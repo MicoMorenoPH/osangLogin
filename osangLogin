@@ -1,0 +1,76 @@
+1. UI
+
+<h1>LOGIN</h1>
+
+
+<h5>username</h5> <input id="txtUsername"> <br> <br>
+<h5>password</h5> <input id="txtPassword"> <br> <br>
+<button id="btnSubmit"> submit </button>
+
+
+@section scripts{
+
+    <script src="~/Scripts/Login.js"></script>
+
+}
+
+2. JS
+
+$('#btnSubmit').click(function () {
+
+    //alert ($('#txtUsername').val())
+    //alert($('#txtPassword').val())
+    //alert("hi");
+
+    $.ajax({
+        url: "/Home/CheckLogin",
+        type: "post",
+        dataType: "json",
+        data: {
+            username: $('#txtUsername').val(),
+            password: $('#txtPassword').val(),
+        },
+        success: function (retVal) {
+            alert(retVal);
+        }
+    });
+
+}
+);
+
+3. WEB CONFIG
+<connectionStrings>
+    <add name="HPCOMMON" connectionString="Data Source=DESKTOP-BFFH489\SQLEXPRESS;Initial Catalog=HPCOMMON;Integrated Security=False;UID=sapdb;PWD=sapdb"/>
+</connectionStrings>
+
+4. CONTROLLER
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+
+public ActionResult CheckLogin(string username,string password)
+{
+    //..open database
+    SqlConnection cn = new SqlConnection(LoginConnection);
+    cn.Open();
+
+    //..script database
+    scripts = "select top 1 1 from Users2 where UserName = '"+ username +"' and Pwd = '"+ password +"'";
+    cmd = new SqlCommand(scripts, cn);
+    cmd.CommandTimeout = 0;
+    scripts = Convert.ToString(cmd.ExecuteScalar());
+
+    if (scripts == "1")
+    {
+        retVal = "Success login";
+    }
+    else {
+        retVal = "wrong password";
+    }
+
+
+    //..close database
+    cn.Dispose();
+
+    return Json(retVal, JsonRequestBehavior.AllowGet);
+}
